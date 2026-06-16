@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from database.mongo_db import connect_to_mongo, close_mongo_connection
-from routes import auth, health, repository
+from routes import auth, health, repository, chat
 
 
 @asynccontextmanager
@@ -42,6 +42,7 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(repository.router)
+app.include_router(chat.router)
 
 
 @app.get("/")

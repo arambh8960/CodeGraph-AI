@@ -26,10 +26,23 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear token and redirect to login
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+    // If unauthorized, clear token and redirect to login for protected routes.
+    // But avoid redirecting when the request itself is an auth attempt (login/signup)
+    // to prevent the login page from reloading when backend returns 401 for invalid credentials.
+    try {
+      const status = error.response?.status
+      const reqUrl = error.config?.url || ''
+
+      const isAuthEndpoint = reqUrl.includes('/auth/login') || reqUrl.includes('/auth/signup')
+
+      if (status === 401 && !isAuthEndpoint) {
+        // Clear token and redirect to login for other requests
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      }
+    } catch (e) {
+      // Swallow any errors here to avoid interfering with the caller
+      console.error('Error in response interceptor:', e)
     }
     return Promise.reject(error)
   }

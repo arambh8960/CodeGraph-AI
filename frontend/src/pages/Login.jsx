@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/AuthLayout'
+import { EyeIcon, EyeOffIcon } from '../components/icons'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const Login = () => {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -19,19 +21,43 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     })
-    setError('')
+    // Do not aggressively clear errors on every keystroke; only clear when user changes input
+    if (error) setError('')
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    // Clear any previous non-field errors before submit
     setError('')
+    // Run client-side validation first
+    if (!validateForm()) return
     setLoading(true)
 
     try {
       await login(formData.email, formData.password)
+      // On success, navigate to dashboard
       navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed. Please try again.')
+      // Network error
+      if (!err.response) {
+        setError('Network error. Please check your internet connection and try again.')
+      } else {
+        // Backend response handling
+        const data = err.response.data
+        const detail = data?.detail
+
+        if (typeof detail === 'string') {
+          setError(detail)
+        } else if (Array.isArray(detail)) {
+          // FastAPI validation errors often come as a list of {loc,msg,type}
+          setError(detail[0]?.msg || 'Invalid email or password')
+        } else if (data?.message) {
+          // Some endpoints may return {message: '...'}
+          setError(data.message)
+        } else {
+          setError('Invalid email or password')
+        }
+      }
     } finally {
       setLoading(false)
     }
@@ -69,19 +95,27 @@ const Login = () => {
           />
         </div>
 
-        <div>
+        <div className="relative">
           <label className="block text-white/80 mb-2 text-sm font-medium">
             Password
           </label>
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="input-field"
+            className="input-field pr-10"
             placeholder="••••••••"
             required
           />
+          <button
+            type="button"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-3 top-9 p-1 text-white/60 hover:text-white"
+          >
+            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+          </button>
         </div>
 
         <button

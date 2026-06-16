@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/AuthLayout'
+import { EyeIcon, EyeOffIcon } from '../components/icons'
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const Signup = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const { signup } = useAuth()
   const navigate = useNavigate()
@@ -22,7 +24,7 @@ const Signup = () => {
       ...formData,
       [e.target.name]: e.target.value
     })
-    setError('')
+    if (error) setError('')
   }
 
   const validateForm = () => {
@@ -64,7 +66,8 @@ const Signup = () => {
       return
     }
 
-    setLoading(true)
+  // Client-side validation already ran; prevent duplicate submissions
+  setLoading(true)
 
     try {
       await signup(formData.name, formData.email, formData.password)
@@ -73,7 +76,19 @@ const Signup = () => {
         navigate('/login')
       }, 2000)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Signup failed. Please try again.')
+      if (!err.response) {
+        setError('Network error. Please try again.')
+      } else {
+        const data = err.response.data
+        const detail = data?.detail
+        if (typeof detail === 'string') {
+          setError(detail)
+        } else if (Array.isArray(detail)) {
+          setError(detail[0]?.msg || 'Signup failed. Please check your input.')
+        } else {
+          setError(data?.message || 'Signup failed. Please try again.')
+        }
+      }
     } finally {
       setLoading(false)
     }
@@ -136,35 +151,51 @@ const Signup = () => {
           />
         </div>
 
-        <div>
+        <div className="relative">
           <label className="block text-white/80 mb-2 text-sm font-medium">
             Password
           </label>
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="input-field"
+            className="input-field pr-10"
             placeholder="••••••••"
             required
           />
+          <button
+            type="button"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-3 top-9 p-1 text-white/60 hover:text-white"
+          >
+            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+          </button>
           <p className="text-white/50 text-xs mt-1">Minimum 8 characters</p>
         </div>
 
-        <div>
+        <div className="relative">
           <label className="block text-white/80 mb-2 text-sm font-medium">
             Confirm Password
           </label>
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="input-field"
+            className="input-field pr-10"
             placeholder="••••••••"
             required
           />
+          <button
+            type="button"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-3 top-9 p-1 text-white/60 hover:text-white"
+          >
+            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+          </button>
         </div>
 
         <button
