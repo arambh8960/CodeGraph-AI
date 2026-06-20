@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { analyzeRepository } from '../services/repositoryService'
 import RepositoryTree from './RepositoryTree'
 import RepositoryChat from "./RepositoryChat";
 import ReactMarkdown from "react-markdown";
+import { useRepository } from '../context/RepositoryContext'
 
 
-const RepositoryAnalyzer = () => {
-  const [repoUrl, setRepoUrl] = useState('')
-  const [result, setResult] = useState(null)
+const RepositoryAnalyzer = ({ onResult, showDetails = true, initialUrl = '' }) => {
+  const { activeRepo, setActiveRepository } = useRepository()
+  const [repoUrl, setRepoUrl] = useState(initialUrl || (activeRepo?.repo_url || ''))
+  const [result, setResult] = useState(activeRepo || null)
   const [loading, setLoading] = useState(false)
 
  const handleAnalyze = async () => {
@@ -19,17 +21,24 @@ const RepositoryAnalyzer = () => {
     return
   }
 
+  if (loading) return
   setLoading(true)
 
   try {
 
     console.log("SENDING REQUEST")
 
-    const response = await analyzeRepository(repoUrl)
-
-    console.log("RESPONSE =", response)
-
+  const response = await analyzeRepository(repoUrl)
+    // Keep local result for standalone use
     setResult(response)
+    // Inform parent if callback provided
+    if (onResult) onResult(response)
+    // Persist into repository context (centralized persistence)
+    try {
+      setActiveRepository({ ...response, repo_url: repoUrl })
+    } catch (e) {
+      // ignore
+    }
 
   } catch (error) {
 
@@ -39,6 +48,21 @@ const RepositoryAnalyzer = () => {
 
     setLoading(false)
 
+  }
+}
+
+useEffect(() => {
+  // keep input in sync when activeRepo changes elsewhere
+  if (activeRepo && activeRepo.repo_url && activeRepo.repo_url !== repoUrl) {
+    setRepoUrl(activeRepo.repo_url)
+    setResult(activeRepo)
+  }
+}, [activeRepo])
+
+const handleKeyDown = (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    handleAnalyze()
   }
 }
   return (
@@ -52,6 +76,7 @@ const RepositoryAnalyzer = () => {
         placeholder="https://github.com/facebook/react"
         value={repoUrl}
         onChange={(e) => setRepoUrl(e.target.value)}
+        onKeyDown={handleKeyDown}
         className="input-field"
       />
 
@@ -68,7 +93,7 @@ const RepositoryAnalyzer = () => {
   </p>
 )}
 
-      {result && (
+      {result && showDetails && (
         <div className="mt-6 text-white space-y-2">
           <p>
             <strong>Status:</strong> {result.status}

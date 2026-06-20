@@ -1,10 +1,10 @@
-# CodeGraph AI
+# Reporyx AI
 
 AI-Powered Developer Onboarding Assistant for GitHub Repositories
 
 ## Overview
 
-CodeGraph AI is an intelligent developer onboarding assistant that helps you understand any GitHub repository quickly and efficiently. Whether you're joining a new team, exploring open-source projects, or analyzing codebases, CodeGraph AI provides AI-powered insights to accelerate your understanding.
+Reporyx AI is an intelligent developer onboarding assistant that helps you understand any GitHub repository quickly and efficiently. Whether you're joining a new team, exploring open-source projects, or analyzing codebases, Reporyx AI provides AI-powered insights to accelerate your understanding.
 
 ## Tech Stack
 

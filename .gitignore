@@ -20,3 +20,5 @@ data/repositories/
 test-repo/
 # Chroma Vector Database
 backend/chroma_db/
+
+frontend/dist/

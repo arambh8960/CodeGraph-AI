@@ -73,66 +73,68 @@ const Login = () => {
 
   return (
     <AuthLayout title="Welcome Back">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-6">
+        <p className="text-center text-white/70 mb-2">Sign in to continue to CodeGraph — access repository summaries, ask questions, and explore code structure.</p>
+
         {error && (
-          <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-sm">
+          <div className="p-3 bg-red-600/10 border border-red-500/30 rounded-lg text-red-200 text-sm">
             {error}
           </div>
         )}
 
-        <div>
-          <label className="block text-white/80 mb-2 text-sm font-medium">
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="input-field"
-            placeholder="you@example.com"
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="flex flex-col gap-2">
+            <label className="text-xs text-white/70 font-medium">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="input-field bg-white/5 placeholder-white/30"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
 
-        <div className="relative">
-          <label className="block text-white/80 mb-2 text-sm font-medium">
-            Password
-          </label>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="input-field pr-10"
-            placeholder="••••••••"
-            required
-          />
+          <div className="relative flex flex-col gap-2">
+            <label className="text-xs text-white/70 font-medium">Password</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="input-field pr-10 bg-white/5 placeholder-white/30"
+              placeholder="••••••••"
+              required
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => setShowPassword((s) => !s)}
+              className="absolute right-3 top-9 p-1 text-white/60 hover:text-white"
+            >
+              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            </button>
+          </div>
+
           <button
-            type="button"
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-            onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-3 top-9 p-1 text-white/60 hover:text-white"
+            type="submit"
+            disabled={loading}
+            className="w-full btn-primary shadow-lg transform-gpu hover:-translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
+        </form>
+
+        <div className="flex items-center justify-center">
+          <p className="text-center text-white/70 text-sm">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-blue-400 hover:text-blue-300 font-medium">
+              Sign up
+            </Link>
+          </p>
         </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-        >
-          {loading ? 'Signing in...' : 'Sign In'}
-        </button>
-
-        <p className="text-center text-white/70 text-sm">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-blue-400 hover:text-blue-300 font-medium">
-            Sign up
-          </Link>
-        </p>
-      </form>
+      </div>
     </AuthLayout>
   )
 }

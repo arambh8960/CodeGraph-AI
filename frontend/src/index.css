@@ -8,6 +8,15 @@
   }
 }
 
+/* Ensure no default browser margin and root fills viewport so header can sit at y=0 */
+@layer base {
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    background: transparent;
+  }
+}
+
 @layer components {
   .glass-card {
     @apply bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl;

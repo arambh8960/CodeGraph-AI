@@ -1,13 +1,23 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
+import { useRepository } from '../context/RepositoryContext'
 
-const RepositoryChat = ({ repoName }) => {
+const RepositoryChat = ({ repoName, persistedMessages = [] }) => {
+
+  const { addChatMessage, activeRepo } = useRepository()
 
   const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(persistedMessages || []);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // sync when activeRepo updates (e.g., imported from storage)
+    if (activeRepo && activeRepo.chatMessages) {
+      setMessages(activeRepo.chatMessages)
+    }
+  }, [activeRepo])
 
   const askQuestion = async () => {
 
@@ -17,13 +27,9 @@ const RepositoryChat = ({ repoName }) => {
 
     const userQuestion = question;
 
-    setMessages(prev => [
-      ...prev,
-      {
-        role: "user",
-        content: userQuestion
-      }
-    ]);
+    const userMsg = { role: "user", content: userQuestion }
+    setMessages(prev => [...prev, userMsg]);
+    addChatMessage(userMsg)
 
     setQuestion("");
     setLoading(true);
@@ -39,25 +45,15 @@ const RepositoryChat = ({ repoName }) => {
         }
       );
 
-      setMessages(prev => [
-        ...prev,
-        {
-          role: "assistant",
-          content: response.data.answer,
-          sources: response.data.sources || []
-        }
-      ]);
+      const assistantMsg = { role: "assistant", content: response.data.answer, sources: response.data.sources || [] }
+      setMessages(prev => [...prev, assistantMsg]);
+      addChatMessage(assistantMsg)
 
     } catch (error) {
 
-      setMessages(prev => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "❌ Error generating answer. Please try again."
-        }
-      ]);
+      const errMsg = { role: "assistant", content: "❌ Error generating answer. Please try again." }
+      setMessages(prev => [...prev, errMsg]);
+      addChatMessage(errMsg)
 
     } finally {
 
@@ -114,10 +110,7 @@ const RepositoryChat = ({ repoName }) => {
           >
 
             <strong>
-              {message.role === "user"
-                ? "You"
-                : "CodeGraph AI"}
-              :
+              {message.role === "user" ? "You" : "Reporyx AI"}:
             </strong>
 
             {message.role === "user" ? (

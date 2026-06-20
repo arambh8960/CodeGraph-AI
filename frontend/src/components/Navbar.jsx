@@ -1,24 +1,35 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useRepository } from '../context/RepositoryContext'
+import { useSidebar } from '../context/SidebarContext'
 import { FaCode, FaUser, FaSignOutAlt } from 'react-icons/fa'
 
 const Navbar = () => {
   const { currentUser, logout } = useAuth()
+  const { clearActiveRepository } = useRepository()
   const navigate = useNavigate()
 
   const handleLogout = () => {
     logout()
+    try {
+      clearActiveRepository()
+    } catch (e) {}
     navigate('/')
   }
 
+  const { openMobile } = useSidebar()
+
   return (
-    <nav className="glass-card mx-4 mt-4 px-6 py-4">
+    <nav className="glass-card mx-4 px-6 py-4 sticky top-0 z-30">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2 group">
+        <div className="flex items-center space-x-2 group">
           <FaCode className="text-2xl text-blue-400 group-hover:text-purple-400 transition-colors" />
-          <span className="text-2xl font-bold gradient-text">CodeGraph AI</span>
-        </Link>
+          <div>
+            <div className="text-2xl font-bold gradient-text">Reporyx AI</div>
+            <div className="text-xs text-white/60">Repository Intelligence Platform</div>
+          </div>
+        </div>
 
         <div className="flex items-center space-x-4">
           {currentUser ? (

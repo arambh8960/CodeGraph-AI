@@ -1,4 +1,4 @@
-# CodeGraph AI - Frontend
+# Reporyx AI - Frontend
 
 AI-Powered Developer Onboarding Assistant for GitHub Repositories
 

@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI application
 app = FastAPI(
-    title="CodeGraph AI",
+    title="Reporyx AI",
     description="AI-Powered Developer Onboarding Assistant for GitHub Repositories",
     version="1.0.0",
     lifespan=lifespan
@@ -49,7 +49,7 @@ app.include_router(chat.router)
 async def root():
     """Root endpoint"""
     return {
-        "message": "Welcome to CodeGraph AI",
+    "message": "Welcome to Reporyx AI",
         "version": "1.0.0",
         "status": "running"
     }
